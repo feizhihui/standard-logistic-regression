@@ -4,15 +4,6 @@ import tensorflow as tf
 import logistic_model
 from sklearn import metrics
 
-"""
-batch_size = 16
-layers = [3, 16, 1]
-learning_rate = 0.01
-threshold = 0.5
-epoch_num = 30
-show_step = 200
-"""
-
 batch_size = 128
 epoch_num = 60
 show_step = 200
