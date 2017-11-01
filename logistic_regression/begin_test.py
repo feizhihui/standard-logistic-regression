@@ -6,13 +6,11 @@ import logistic_model
 from sklearn import metrics
 
 batch_size = 9600
-layers = [3, 16, 1]
-threshold = 0.5
 show_step = 200
 
 master = data_input.DataMaster(train_mode=False)
 
-model = logistic_model.LogisticModel()
+model = logistic_model.LogisticModel(on_train=False)
 
 saver = tf.train.Saver()
 
