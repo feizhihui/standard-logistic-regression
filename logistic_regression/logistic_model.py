@@ -8,9 +8,14 @@ threshold = 0.5
 
 
 class LogisticModel(object):
-    def __init__(self, on_train):
+    def __init__(self, on_train, decay_step=10000):
         self.input_data = tf.placeholder(tf.float32, [None, layers[0]])
         self.labels = tf.placeholder(tf.int32, [None, 1])
+        self.global_step = tf.Variable(0)
+        self.decay_lr = tf.train.exponential_decay(learning_rate,
+                                                   self.global_step,
+                                                   decay_steps=decay_step,
+                                                   decay_rate=0.98, staircase=True)
         output = self.input_data
         for i in range(1, len(layers)):
             vshape = [layers[i - 1], layers[i]]
@@ -23,7 +28,8 @@ class LogisticModel(object):
 
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.cast(self.labels, tf.float32), logits=output)
         self.cost = tf.reduce_mean(loss)
-        self.train_op = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(self.cost)
+        self.train_op = tf.train.AdamOptimizer(learning_rate=self.decay_lr).minimize(self.cost,
+                                                                                     global_step=self.global_step)
 
         self.logits = tf.sigmoid(output)
         self.preds = tf.where(tf.greater(self.logits, threshold), tf.ones_like(output, dtype=tf.int32),

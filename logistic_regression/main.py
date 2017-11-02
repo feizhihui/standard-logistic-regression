@@ -5,12 +5,12 @@ import logistic_model
 from sklearn import metrics
 
 batch_size = 128
-epoch_num = 60
+epoch_num = 70
 show_step = 200
 
 master = data_input.DataMaster()
 
-model = logistic_model.LogisticModel(on_train=True)
+model = logistic_model.LogisticModel(True, master.datasize // batch_size)
 with tf.Session() as sess:
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -35,3 +35,5 @@ with tf.Session() as sess:
     # store
     saver = tf.train.Saver()
     saver.save(sess, '../Data/logistic_model')
+    # print(sess.run(model.global_step))
+    # print(sess.run(model.decay_lr))
