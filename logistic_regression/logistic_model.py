@@ -20,7 +20,6 @@ class LogisticModel(object):
         for i in range(1, len(layers)):
             vshape = [layers[i - 1], layers[i]]
             W = tf.Variable(tf.truncated_normal(vshape) * 0.01, name="weight_" + str(i))
-            b = tf.Variable(0.0, name="bias_" + str(i))
             output = tf.matmul(output, W)
             output = self.batch_norm_layer(output, layers[i], on_train)
             if i < len(layers) - 1:

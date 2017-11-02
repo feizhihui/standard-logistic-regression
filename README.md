@@ -2,7 +2,7 @@
 This repo is a code template for standard logistic regression.<br>
 The code contains the calculation methods for computing accuracy, precision, recall, f-measure and auc score using tensorflow intrinsic functions.
 ***
-**Accuract, Precision, Recall, F-measure, AUC score computing snippet**
+**Accuracy, Precision, Recall, F-measure, AUC score computing snippet**
 ```python
     print("accuracy %.6f" % metrics.accuracy_score(labels, y_pred))
     print("Precision %.6f" % metrics.precision_score(labels, y_pred))
