@@ -13,15 +13,15 @@ class DataMaster(object):
         with open(filename, 'r') as file:
             train_x, train_y, train_c = [], [], []
             for row in file.readlines()[4:]:
-                cols = row.split(',')
-                cat, seq = cols[4], cols[10].split(";")[-41:]
-                print(seq, cat)
-                assert seq[20] == "A" or seq[20] == "C"
+                cols = row.split()
+                cat, seq = cols[4], cols[10].split(";")[1][-41:]
+                # print(seq, cat)
+                # assert seq[20] == "A" or seq[20] == "C", "Error:" + seq[20]
                 train_x.append(self.seq2matrix(seq))
                 if cat == "modified_base":
-                    train_y.append(1)
-                else:
                     train_y.append(0)
+                else:
+                    train_y.append(1)
                 train_c.append(cat)
 
         print('Data input completed filename=', filename)
@@ -39,7 +39,7 @@ class DataMaster(object):
 
     # AGCT=>0123
     def seq2matrix(self, line):
-        seq_arr = np.zeros([40])
+        seq_arr = np.zeros([41])
         for j, c in enumerate(line):
             if c == 'A':
                 seq_arr[j] = 0
@@ -56,10 +56,12 @@ class DataMaster(object):
         np.random.shuffle(mark)
         self.train_x = np.concatenate([self.datasets[self.pos_idx], self.datasets[self.neg_idx][mark]])
         self.train_y = np.concatenate([self.datalabels[self.pos_idx], self.datalabels[self.neg_idx][mark]])
+        self.train_c = np.concatenate([self.datacat[self.pos_idx], self.datacat[self.neg_idx][mark]])
         mark = list(range(self.datasize))
         np.random.shuffle(mark)
         self.train_x = self.train_x[mark]
         self.train_y = self.train_y[mark]
+        self.train_c = self.train_c[mark]
 
 
 if __name__ == '__main__':

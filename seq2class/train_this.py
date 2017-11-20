@@ -11,7 +11,7 @@ lr = 0.005
 
 class SeqModel(object):
     def __init__(self):
-        self.x = tf.placeholder(tf.int32, [None, 40])
+        self.x = tf.placeholder(tf.int32, [None, 41])
         self.y = tf.placeholder(tf.int32, [None])
 
         input_x = tf.one_hot(self.x, depth=3)
@@ -44,7 +44,7 @@ class SeqModel(object):
             self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.cost)
             self.prediction = tf.arg_max(tf.nn.softmax(logits), dimension=1)
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.cast(self.prediction, tf.int32), self.y), tf.float32))
-
+            self.auc, self.auc_opt = tf.contrib.metrics.streaming_auc(self.logits, self.labels)
 
 # ===================================
 
@@ -72,9 +72,9 @@ with tf.Session() as sess:
                     feed_dict={model.x: batch_xs,
                                model.y: batch_ys})
                 print("cost function: %.3f, accuracy: %.3f" % (batch_cost, batch_accuracy))
-                # print("Precision %.6f" % metrics.precision_score(batch_ys, y_pred))
-                # print("Recall %.6f" % metrics.recall_score(batch_ys, y_pred))
-                # print("f1_score %.6f" % metrics.f1_score(batch_ys, y_pred))
+                print("Precision %.6f" % metrics.precision_score(batch_ys, y_pred))
+                print("Recall %.6f" % metrics.recall_score(batch_ys, y_pred))
+                print("f1_score %.6f" % metrics.f1_score(batch_ys, y_pred))
 
     # store
     saver = tf.train.Saver()
