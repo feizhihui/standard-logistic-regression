@@ -43,6 +43,6 @@ class SeqModel(object):
             self.cost = tf.reduce_mean(loss)
             self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.cost)
             self.activation_logits = tf.nn.sigmoid(logits)[:, 1]
-            self.prediction = tf.arg_max(self.activation_logits, dimension=1)
+            self.prediction = tf.arg_max(logits, dimension=1)
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.cast(self.prediction, tf.int32), self.y), tf.float32))
             self.auc, self.auc_opt = tf.contrib.metrics.streaming_auc(self.activation_logits, self.y)
