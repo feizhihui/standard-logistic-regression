@@ -19,10 +19,12 @@ class DataMaster(object):
         print('Data input completed filename=', filename)
         self.datasets = np.array(train_x, dtype=np.float32)
         self.datalabels = np.array(train_y, dtype=np.int32)
+        print("availabel data numbers", str(len(self.datalabels)))
         if train_mode:
             self.pos_idx = (self.datalabels == 1).reshape(-1)
             self.neg_idx = (self.datalabels == 0).reshape(-1)
             self.datasize = len(self.datalabels[self.pos_idx]) * 2
+            print("positive data numbers", str(self.datasize // 2))
         else:
             self.datasize = len(self.datalabels)
 
