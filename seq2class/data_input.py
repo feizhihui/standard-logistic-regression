@@ -7,16 +7,21 @@ class DataMaster(object):
     def __init__(self, train_mode=True):
         if train_mode:
             filename = '../Data/ecoli_modifications.gff'
+            # filename = '../Data/lambda_modifications.gff'
             cat_idx, seq_idx = 4, 10
+            # cat_idx, seq_idx = 2, 8
         else:
             filename = '../Data/lambda_modifications.gff'
+            # filename = '../Data/ecoli_modifications.gff'
             cat_idx, seq_idx = 2, 8
-
+            # cat_idx, seq_idx = 4, 10
         with open(filename, 'r') as file:
             train_x, train_y, train_c = [], [], []
             for row in file.readlines()[4:]:
                 cols = row.split()
                 cat, seq = cols[cat_idx], cols[seq_idx].split(";")[1][-41:]
+                if seq.endswith("N"):
+                    continue
                 # print(seq, cat)
                 # assert seq[20] == "A" or seq[20] == "C", "Error:" + seq[20]
                 train_x.append(self.seq2matrix(seq))
@@ -51,6 +56,8 @@ class DataMaster(object):
                 seq_arr[j] = 2
             elif c == 'T':
                 seq_arr[j] = 3
+            else:
+                raise BaseException("Character Exceptin:" + c)
         return seq_arr
 
     def shuffle(self):

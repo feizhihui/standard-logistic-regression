@@ -4,7 +4,7 @@ import numpy as np
 
 n_hidden = 20
 keep_prob = 0.9
-lr = 1
+lr = 0.01
 sequence_lens = 41
 class_num = 2
 
