@@ -30,9 +30,8 @@ class SeqModel(object):
                                                                dtype=tf.float32)
         # outputs, output_sate = tf.nn.dynamic_rnn(lstm_bw_cell, x, dtype=tf.float32)
         # shape is n*40*(n_hidden+n_hidden) because of forward + backward
-        outputs = (outputs[0][0], outputs[1][-1])
-        outputs = tf.concat(outputs, 1)
-
+        outputs = (outputs[0][:, -1, :], outputs[1][:, 0, :])
+        print(outputs.get_shape().as_list())
         with tf.name_scope("softmax_layer"):
             weights = tf.Variable(tf.truncated_normal([2 * n_hidden, 3]) * np.sqrt(2.0 / (2 * n_hidden)),
                                   dtype=tf.float32)
@@ -40,8 +39,9 @@ class SeqModel(object):
             logits = tf.matmul(outputs, weights) + bias
 
         with tf.name_scope("evaluation"):
-            self.loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=logits)
-            self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.loss)
+            loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=logits)
+            self.cost = tf.reduce_mean(loss)
+            self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.cost)
             self.prediction = tf.arg_max(tf.nn.softmax(logits), dimension=1)
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.cast(self.prediction, tf.int32), self.y), tf.float32))
 
@@ -63,15 +63,15 @@ with tf.Session() as sess:
         print('epoch - ', str(epoch + 1))
         master.shuffle()
         for step, index in enumerate(range(0, master.datasize, batch_size)):
-            batch_xs = master.seq2onehot(master.train_x[index:index + batch_size])
+            batch_xs = master.train_x[index:index + batch_size]
             batch_ys = master.train_y[index:index + batch_size]
             sess.run(model.train_op, feed_dict={model.x: batch_xs, model.y: batch_ys})
             if step % show_step == 0:
-                y_pred, batch_cost, batch_accuracy, auc = sess.run(
-                    [model.prediction, model.loss, model.accuracy, model.train_op],
+                y_pred, batch_cost, batch_accuracy = sess.run(
+                    [model.prediction, model.cost, model.accuracy],
                     feed_dict={model.x: batch_xs,
                                model.y: batch_ys})
-                print("cost function: %.3f, accuracy: %.3f, auc: %.3f" % (batch_cost, batch_accuracy, auc))
+                print("cost function: %.3f, accuracy: %.3f" % (batch_cost, batch_accuracy))
                 # print("Precision %.6f" % metrics.precision_score(batch_ys, y_pred))
                 # print("Recall %.6f" % metrics.recall_score(batch_ys, y_pred))
                 # print("f1_score %.6f" % metrics.f1_score(batch_ys, y_pred))
