@@ -4,8 +4,8 @@ from data_input import DataMaster
 from sklearn import metrics
 from sequence_model import SeqModel
 
-batch_size = 128
-epoch_num = 7
+batch_size = 256
+epoch_num = 10
 show_step = 200
 
 # ===================================
