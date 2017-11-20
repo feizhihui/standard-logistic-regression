@@ -6,7 +6,7 @@ import numpy as np
 
 n_hidden = 20
 keep_prob = 0.9
-lr = 0.01
+lr = 0.005
 
 
 class SeqModel(object):
@@ -14,7 +14,7 @@ class SeqModel(object):
         self.x = tf.placeholder(tf.int32, [None, 40])
         self.y = tf.placeholder(tf.int32, [None])
 
-        input_x = tf.one_hot(self.x, depth=4)
+        input_x = tf.one_hot(self.x, depth=3)
         # Current data input shape: (batch_size, n_steps, n_input)
         # Forward direction cell
         lstm_fw_cell = tf.contrib.rnn.GRUCell(n_hidden)
@@ -31,7 +31,7 @@ class SeqModel(object):
         # outputs, output_sate = tf.nn.dynamic_rnn(lstm_bw_cell, x, dtype=tf.float32)
         # shape is n*40*(n_hidden+n_hidden) because of forward + backward
         outputs = (outputs[0][:, -1, :], outputs[1][:, 0, :])
-        print(outputs.get_shape().as_list())
+        outputs = tf.concat(outputs, 1)
         with tf.name_scope("softmax_layer"):
             weights = tf.Variable(tf.truncated_normal([2 * n_hidden, 3]) * np.sqrt(2.0 / (2 * n_hidden)),
                                   dtype=tf.float32)
