@@ -12,10 +12,12 @@ batch_size = 128
 epoch_num = 70
 show_step = 200
 
+sequence_lens = 41
+
 
 class SeqModel(object):
     def __init__(self):
-        self.x = tf.placeholder(tf.int32, [None, 41])
+        self.x = tf.placeholder(tf.int32, [None, sequence_lens])
         self.y = tf.placeholder(tf.int32, [None])
 
         input_x = tf.one_hot(self.x, depth=3)
@@ -30,7 +32,7 @@ class SeqModel(object):
         # x shape is [batch_size, max_time, input_size]
         outputs, output_sate = tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell, lstm_bw_cell, input_x,
                                                                sequence_length=tf.ones_like(self.y,
-                                                                                            dtype=tf.int32) * 40,
+                                                                                            dtype=tf.int32) * sequence_lens,
                                                                dtype=tf.float32)
         # outputs, output_sate = tf.nn.dynamic_rnn(lstm_bw_cell, x, dtype=tf.float32)
         # shape is n*40*(n_hidden+n_hidden) because of forward + backward
@@ -79,6 +81,4 @@ with tf.Session() as sess:
 
     # store
     saver = tf.train.Saver()
-    saver.save(sess, '../Data/logistic_model')
-    # print(sess.run(model.global_step))
-    # print(sess.run(model.decay_lr))
+    saver.save(sess, '../Data/sequence_model')
