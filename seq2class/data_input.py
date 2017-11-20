@@ -6,12 +6,12 @@ class DataMaster(object):
     # ==============
     def __init__(self, train_mode=True):
         if train_mode:
-            filename = '../Data/ecoli_modifications.gff'
+            filename = '../Data/ecoli_modifications.gff' + ".txt"
             # filename = '../Data/lambda_modifications.gff'
             cat_idx, seq_idx = 4, 10
             # cat_idx, seq_idx = 2, 8
         else:
-            filename = '../Data/lambda_modifications.gff'
+            filename = '../Data/lambda_modifications.gff' + ".txt"
             # filename = '../Data/ecoli_modifications.gff'
             cat_idx, seq_idx = 2, 8
             # cat_idx, seq_idx = 4, 10
@@ -71,6 +71,10 @@ class DataMaster(object):
         self.train_x = self.train_x[mark]
         self.train_y = self.train_y[mark]
         self.train_c = self.train_c[mark]
+
+        # marks = list(range(len(self.datasets)))
+        # self.train_x = self.datasets[marks]
+        # self.train_y = self.datalabels[marks]
 
 
 if __name__ == '__main__':
