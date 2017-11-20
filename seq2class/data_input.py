@@ -22,9 +22,11 @@ class DataMaster(object):
                 else:
                     raise BaseException("exception in category", category)
                 print(label)
-                train_x.append(line)
+                train_x.append(self.seq2onehot(line))
                 train_y.append(label)
-        self.datasize = len(train_y)
+        self.train_x = np.array(train_x, dtype=np.int32)
+        self.train_y = np.array(train_y, dtype=np.int32)
+        self.datasize = len(self.train_y)
         print("trainset size:", self.datasize)
 
     def shuffle(self):
@@ -34,18 +36,18 @@ class DataMaster(object):
         self.train_y = self.train_y[mark]
 
     # AGCT=>0123
-    def seq2onehot(self, seqs):
-        seq_arr = np.zeros([len(seqs, 40)])
-        for i, seq in enumerate(seqs):
-            for j, c in enumerate(seq):
-                if c == 'A':
-                    seq_arr[i, j] = 0
-                elif c == 'G':
-                    seq_arr[i, j] = 1
-                elif c == 'C':
-                    seq_arr[i, j] = 2
-                elif c == 'T':
-                    seq_arr[i, j] = 3
+    def seq2onehot(self, line):
+        seq_arr = np.zeros([40])
+        for j, c in enumerate(line):
+            if c == 'A':
+                seq_arr[j] = 0
+            elif c == 'G':
+                seq_arr[j] = 1
+            elif c == 'C':
+                seq_arr[j] = 2
+            elif c == 'T':
+                seq_arr[j] = 3
+        return seq_arr
 
 
 if __name__ == '__main__':
