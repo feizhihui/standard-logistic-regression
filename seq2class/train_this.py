@@ -8,6 +8,10 @@ n_hidden = 20
 keep_prob = 0.9
 lr = 0.005
 
+batch_size = 128
+epoch_num = 70
+show_step = 200
+
 
 class SeqModel(object):
     def __init__(self):
@@ -49,13 +53,9 @@ class SeqModel(object):
 
 # ===================================
 
-batch_size = 128
-epoch_num = 70
-show_step = 200
-
 master = DataMaster()
-
 model = SeqModel()
+
 with tf.Session() as sess:
     init = tf.global_variables_initializer()
     sess.run(init)
