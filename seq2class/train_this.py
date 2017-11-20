@@ -1,6 +1,77 @@
 # encoding=utf-8
+import tensorflow as tf
+from data_input import DataMaster
+from sklearn import metrics
+import numpy as np
+
+n_hidden = 20
+keep_prob = 0.9
+lr = 0.01
 
 
+class SeqModel(object):
+    def __init__(self):
+        self.x = tf.placeholder(tf.float32, [None, 40])
+        self.y = tf.placeholder(tf.float32, [None])
 
-if __name__ == '__main__':
-    pass
+        input_x = tf.one_hot(self.x, depth=4)
+        # Current data input shape: (batch_size, n_steps, n_input)
+        # Forward direction cell
+        lstm_fw_cell = tf.contrib.rnn.GRUCell(n_hidden)
+        lstm_fw_cell = tf.contrib.rnn.DropoutWrapper(lstm_fw_cell, output_keep_prob=keep_prob)
+        # Backward direction cell
+        lstm_bw_cell = tf.contrib.rnn.GRUCell(n_hidden)
+        lstm_bw_cell = tf.contrib.rnn.DropoutWrapper(lstm_bw_cell, output_keep_prob=keep_prob)
+        # network = rnn_cell.MultiRNNCell([lstm_fw_cell, lstm_bw_cell] * 3)
+        # x shape is [batch_size, max_time, input_size]
+        outputs, output_sate = tf.nn.bidirectional_dynamic_rnn(lstm_fw_cell, lstm_bw_cell, input_x,
+                                                               sequence_length=tf.ones_like(self.y,
+                                                                                            dtype=tf.int32) * 40,
+                                                               dtype=tf.float32)
+        # outputs, output_sate = tf.nn.dynamic_rnn(lstm_bw_cell, x, dtype=tf.float32)
+        # shape is n*40*(n_hidden+n_hidden) because of forward + backward
+        outputs = tf.concat(outputs, 2)
+
+        with tf.name_scope("softmax layer"):
+            weights = tf.Variable(tf.truncated_normal([2 * n_hidden, 3]) * np.sqrt(2.0 / (2 * n_hidden)),
+                                  dtype=tf.float32)
+            bias = tf.Variable(tf.zeros([1, 3]), dtype=tf.float32)
+            logits = tf.matmul(outputs, weights) + bias
+            loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=logits)
+            self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(loss)
+            self.prediction = tf.arg_max(tf.nn.softmax(logits), dimension=1)
+
+
+batch_size = 128
+epoch_num = 70
+show_step = 200
+
+master = DataMaster()
+
+model = SeqModel()
+with tf.Session() as sess:
+    init = tf.global_variables_initializer()
+    sess.run(init)
+
+    for epoch in range(epoch_num):
+        print('epoch - ', str(epoch + 1))
+        master.shuffle()
+        for step, index in enumerate(range(0, master.datasize, batch_size)):
+            batch_xs = master.seq2onehot(master.train_x[index:index + batch_size])
+            batch_ys = master.train_y[index:index + batch_size]
+            sess.run(model.train_op, feed_dict={model.input_data: batch_xs, model.labels: batch_ys})
+            if step % show_step == 0:
+                y_pred, batch_cost, batch_accuracy, auc = sess.run(
+                    [model.preds, model.cost, model.accuracy, model.auc_opt],
+                    feed_dict={model.input_data: batch_xs,
+                               model.labels: batch_ys})
+                print("cost function: %.3f, accuracy: %.3f, auc: %.3f" % (batch_cost, batch_accuracy, auc))
+                print("Precision %.6f" % metrics.precision_score(batch_ys, y_pred))
+                print("Recall %.6f" % metrics.recall_score(batch_ys, y_pred))
+                print("f1_score %.6f" % metrics.f1_score(batch_ys, y_pred))
+
+    # store
+    saver = tf.train.Saver()
+    saver.save(sess, '../Data/logistic_model')
+    # print(sess.run(model.global_step))
+    # print(sess.run(model.decay_lr))
