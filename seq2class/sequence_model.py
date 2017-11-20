@@ -6,6 +6,7 @@ n_hidden = 20
 keep_prob = 0.9
 lr = 0.005
 sequence_lens = 41
+class_num = 2
 
 
 class SeqModel(object):
@@ -32,16 +33,16 @@ class SeqModel(object):
         outputs = (outputs[0][:, -1, :], outputs[1][:, 0, :])
         outputs = tf.concat(outputs, 1)
         with tf.name_scope("softmax_layer"):
-            weights = tf.Variable(tf.truncated_normal([2 * n_hidden, 3]) * np.sqrt(2.0 / (2 * n_hidden)),
+            weights = tf.Variable(tf.truncated_normal([2 * n_hidden, class_num]) * np.sqrt(2.0 / (2 * n_hidden)),
                                   dtype=tf.float32)
-            bias = tf.Variable(tf.zeros([1, 3]), dtype=tf.float32)
+            bias = tf.Variable(tf.zeros([1, class_num]), dtype=tf.float32)
             logits = tf.matmul(outputs, weights) + bias
 
         with tf.name_scope("evaluation"):
             loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y, logits=logits)
             self.cost = tf.reduce_mean(loss)
             self.train_op = tf.train.AdamOptimizer(learning_rate=lr).minimize(self.cost)
-            self.activation_logits = tf.nn.sigmoid(logits)
+            self.activation_logits = tf.nn.sigmoid(logits)[:, 1]
             self.prediction = tf.arg_max(self.activation_logits, dimension=1)
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.cast(self.prediction, tf.int32), self.y), tf.float32))
-            self.auc, self.auc_opt = tf.contrib.metrics.streaming_auc(self.activation_logits[:, 1], self.y)
+            self.auc, self.auc_opt = tf.contrib.metrics.streaming_auc(self.activation_logits, self.y)

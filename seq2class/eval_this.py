@@ -44,5 +44,7 @@ with tf.Session() as sess:
     print("Precision %.6f" % metrics.precision_score(labels, y_pred))
     print("Recall %.6f" % metrics.recall_score(labels, y_pred))
     print("f1_score %.6f" % metrics.f1_score(labels, y_pred))
+    print(len(labels))
+    print(len(y_logits))
     fpr, tpr, threshold = metrics.roc_curve(labels, y_logits)
     print("auc_socre %.6f" % metrics.auc(fpr, tpr))
