@@ -46,6 +46,7 @@ class SeqModel(object):
             self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.cast(self.prediction, tf.int32), self.y), tf.float32))
             self.auc, self.auc_opt = tf.contrib.metrics.streaming_auc(self.logits, self.labels)
 
+
 # ===================================
 
 batch_size = 128
@@ -67,11 +68,11 @@ with tf.Session() as sess:
             batch_ys = master.train_y[index:index + batch_size]
             sess.run(model.train_op, feed_dict={model.x: batch_xs, model.y: batch_ys})
             if step % show_step == 0:
-                y_pred, batch_cost, batch_accuracy = sess.run(
-                    [model.prediction, model.cost, model.accuracy],
+                y_pred, batch_cost, batch_accuracy, auc = sess.run(
+                    [model.prediction, model.cost, model.accuracy, model.auc_opt],
                     feed_dict={model.x: batch_xs,
                                model.y: batch_ys})
-                print("cost function: %.3f, accuracy: %.3f" % (batch_cost, batch_accuracy))
+                print("cost function: %.3f, accuracy: %.3f, auc: %.3f" % (batch_cost, batch_accuracy, auc))
                 print("Precision %.6f" % metrics.precision_score(batch_ys, y_pred))
                 print("Recall %.6f" % metrics.recall_score(batch_ys, y_pred))
                 print("f1_score %.6f" % metrics.f1_score(batch_ys, y_pred))
