@@ -4,7 +4,7 @@ import numpy as np
 
 n_hidden = 20
 keep_prob = 0.9
-lr = 0.005
+lr = 1
 sequence_lens = 41
 class_num = 2
 
@@ -28,10 +28,12 @@ class SeqModel(object):
                                                                sequence_length=tf.ones_like(self.y,
                                                                                             dtype=tf.int32) * sequence_lens,
                                                                dtype=tf.float32)
-        # outputs, output_sate = tf.nn.dynamic_rnn(lstm_bw_cell, x, dtype=tf.float32)
-        # shape is n*40*(n_hidden+n_hidden) because of forward + backward
+        #
+        # # outputs, output_sate = tf.nn.dynamic_rnn(lstm_bw_cell, x, dtype=tf.float32)
+        # # shape is n*40*(n_hidden+n_hidden) because of forward + backward
         outputs = (outputs[0][:, -1, :], outputs[1][:, 0, :])
         outputs = tf.concat(outputs, 1)
+
         with tf.name_scope("sigmoid_layer"):
             weights = tf.Variable(tf.truncated_normal([2 * n_hidden, class_num]) * np.sqrt(2.0 / (2 * n_hidden)),
                                   dtype=tf.float32)
